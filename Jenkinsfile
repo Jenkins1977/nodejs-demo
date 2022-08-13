@@ -39,12 +39,14 @@ pipeline {
                 	// If required, change the ownership to centos user of webapps folder in tomcat. chown -R centos:centos webapps
                 	// scp <src_file> username@IP:<destnation_path>
                 	// var/lib/jenkins/workspace/pipeline_job/webapp
-                   	sh "scp -o StrictHostKeyChecking=no services.yml node-app-pod.yml centos@15.207.83.20:/home/centos/"
+                   	sh "scp -o StrictHostKeyChecking=no service.yml deployment.yml centos@15.207.83.20:/home/centos/"
 			script{
 				try{
-				     sh "ssh centos@15.207.83.20 minikube kubectl apply -f ."
+                     //sh "alias kubectl='minikube kubectl --'"
+				     sh "ssh centos@15.207.83.20 minikube kubectl -- apply -f ."
 				}catch(error){
-				     sh "ssh centos@15.207.83.20 minikube kubectl create -f ."
+                     //sh "alias kubectl='minikube kubectl --'"
+				     sh "ssh centos@15.207.83.20 minikube kubectl -- apply -f ."
 				}
 			}
                 }
