@@ -1,7 +1,8 @@
 pipeline {
     agent any 
     environment {
-    DOCKERHUB_CREDENTIALS = credentials('rahul-dockerhub-login')
+        DOCKER_TAG = getDockerTag()
+        DOCKERHUB_CREDENTIALS = credentials('rahul-dockerhub-login')
     }
     stages {
         stage('check user') {
@@ -17,7 +18,8 @@ pipeline {
 
         stage('Build docker image') {
             steps {  
-                sh 'docker build -t rahultew/nodeapp:$BUILD_NUMBER .'
+                //sh 'docker build -t rahultew/nodeapp:$BUILD_NUMBER .'
+                sh 'docker build -t rahultew/nodeapp:${DOCKER_TAG} .'
             }
         }
         stage('login to dockerhub') {
@@ -27,18 +29,16 @@ pipeline {
         }
         stage('push image') {
             steps{
-                sh 'docker push rahultew/nodeapp:$BUILD_NUMBER'
+                //sh 'docker push rahultew/nodeapp:$BUILD_NUMBER'
+                sh 'docker push rahultew/nodeapp:${DOCKER_TAG}'
             }
         }
         stage("deploy 8"){
             steps{
-                //sh "chmod +x changeTag.sh"
-                //sh "./changeTag.sh ${DOCKER_TAG}"
+                sh "chmod +x changeTag.sh"
+                sh "./changeTag.sh ${DOCKER_TAG}"
 
                 sshagent(['deploy_user']) {
-                	// If required, change the ownership to centos user of webapps folder in tomcat. chown -R centos:centos webapps
-                	// scp <src_file> username@IP:<destnation_path>
-                	// var/lib/jenkins/workspace/pipeline_job/webapp
                    	sh "scp -o StrictHostKeyChecking=no service.yml deployment.yml centos@15.207.83.20:/home/centos/"
 			script{
 				try{
@@ -58,5 +58,10 @@ post {
             sh 'docker logout'
         }
     }
+}
+
+def getDockerTag(){
+    def tag  = sh script: 'git rev-parse HEAD', returnStdout: true
+    return tag
 }
 
