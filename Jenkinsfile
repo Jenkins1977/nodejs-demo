@@ -39,7 +39,7 @@ pipeline {
                 sh "./changeTag.sh ${DOCKER_TAG}"
 
                 sshagent(['deploy_user']) {
-                   	sh "scp -o StrictHostKeyChecking=no service.yml deployment.yml centos@15.207.83.20:/home/centos/"
+                   	sh "scp -o StrictHostKeyChecking=no service.yml deployment2.yml centos@15.207.83.20:/home/centos/"
 			script{
 				try{
                      //sh "alias kubectl='minikube kubectl --'"
